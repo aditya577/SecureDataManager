@@ -7,12 +7,12 @@
 ## Features
 
 ### Authentication
-- **PIN-based Authentication**:
+**PIN-based Authentication**:
 - Users must set a PIN during the initial app setup.
 - This PIN is required to access the app on subsequent launches.
 - PINs are stored securely using `EncryptedSharedPreferences`.
 
-- **Future Enhancements**:
+**Future Enhancements**:
 - Biometric authentication for added convenience.
 - PIN reset functionality.
 
