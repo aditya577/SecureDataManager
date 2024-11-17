@@ -108,20 +108,6 @@ fun MainScreen(navController: NavHostController) {
     }
 }
 
-//@Composable
-//fun SecureNotesScreen() {
-//    Surface(
-//        modifier = Modifier.fillMaxSize(),
-//        color = MaterialTheme.colorScheme.background
-//    ) {
-//        Text(
-//            text = "Secure Notes",
-//            modifier = Modifier.fillMaxSize(),
-//            style = MaterialTheme.typography.titleLarge
-//        )
-//    }
-//}
-
 @Composable
 fun DocumentStorageScreen() {
     Surface(

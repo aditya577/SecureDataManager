@@ -7,11 +7,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.securedatamanager.data.database.Note
+import com.example.securedatamanager.utils.EncryptionUtil
 
 @Composable
-fun AddNoteDialog(onDismiss: () -> Unit, onAddNote: (Note) -> Unit) {
-    var title by remember { mutableStateOf("") }
-    var content by remember { mutableStateOf("") }
+fun AddOrEditNoteDialog(
+    noteToEdit: Note?,
+    onDismiss: () -> Unit,
+    onAddOrEditNote: (Note) -> Unit
+) {
+    var title by remember { mutableStateOf(noteToEdit?.title ?: "") }
+    var content by remember { mutableStateOf(noteToEdit?.content ?: "") }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -44,16 +49,17 @@ fun AddNoteDialog(onDismiss: () -> Unit, onAddNote: (Note) -> Unit) {
                     }
                     TextButton(onClick = {
                         if (title.isNotBlank() && content.isNotBlank()) {
-                            onAddNote(
+                            onAddOrEditNote(
                                 Note(
+                                    id = noteToEdit?.id ?: 0, // Use existing ID for edit
                                     title = title,
-                                    content = content,
+                                    content = EncryptionUtil.encrypt(content),
                                     timestamp = System.currentTimeMillis()
                                 )
                             )
                         }
                     }) {
-                        Text("Add")
+                        Text(if (noteToEdit == null) "Add" else "Save")
                     }
                 }
             }
