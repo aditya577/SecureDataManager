@@ -21,7 +21,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.securedatamanager.data.dao.NoteDao
 import com.example.securedatamanager.data.database.AppDatabase
+import com.example.securedatamanager.ui.auth.AuthNavHost
 import com.example.securedatamanager.ui.documents.DocumentStorageScreen
 import com.example.securedatamanager.ui.documents.DocumentViewModel
 import com.example.securedatamanager.ui.documents.DocumentViewModelFactory
@@ -32,23 +34,37 @@ import com.example.securedatamanager.ui.password.PasswordManagerScreen
 import com.example.securedatamanager.ui.password.PasswordManagerViewModel
 import com.example.securedatamanager.ui.password.PasswordManagerViewModelFactory
 import com.example.securedatamanager.ui.theme.SecureDataManagerTheme
-import com.example.securedatamanager.utils.migrateExistingNotes
+import com.example.securedatamanager.utils.EncryptionUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             SecureDataManagerTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    AppNavigator()
-                }
+                AuthNavHost()
             }
         }
     }
 }
+
+//class MainActivity : ComponentActivity() {
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//        setContent {
+//            SecureDataManagerTheme {
+//                Surface(
+//                    modifier = Modifier.fillMaxSize(),
+//                    color = MaterialTheme.colorScheme.background
+//                ) {
+//                    AppNavigator()
+//                }
+//            }
+//        }
+//    }
+//}
 
 @Composable
 fun AppNavigator() {
@@ -121,16 +137,14 @@ fun MainScreen(navController: NavHostController) {
     }
 }
 
-//@Composable
-//fun DocumentStorageScreen() {
-//    Surface(
-//        modifier = Modifier.fillMaxSize(),
-//        color = MaterialTheme.colorScheme.background
-//    ) {
-//        Text(
-//            text = "Document Storage",
-//            modifier = Modifier.fillMaxSize(),
-//            style = MaterialTheme.typography.titleLarge
-//        )
-//    }
-//}
+fun migrateExistingNotes(noteDao: NoteDao) {
+    CoroutineScope(Dispatchers.IO).launch {
+        val notes = noteDao.getAllNotes()
+        notes.forEach { note ->
+            if (!EncryptionUtil.isBase64(note.content)) { // Encrypt if not already encrypted
+                val encryptedContent = EncryptionUtil.encrypt(note.content)
+                noteDao.insertNote(note.copy(content = encryptedContent))
+            }
+        }
+    }
+}
