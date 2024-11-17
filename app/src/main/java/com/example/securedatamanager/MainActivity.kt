@@ -22,6 +22,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.securedatamanager.data.database.AppDatabase
+import com.example.securedatamanager.ui.notes.NoteViewModel
+import com.example.securedatamanager.ui.notes.NoteViewModelFactory
+import com.example.securedatamanager.ui.notes.SecureNotesScreen
 import com.example.securedatamanager.ui.password.PasswordManagerScreen
 import com.example.securedatamanager.ui.password.PasswordManagerViewModel
 import com.example.securedatamanager.ui.password.PasswordManagerViewModelFactory
@@ -61,7 +64,15 @@ fun AppNavigator() {
 
             PasswordManagerScreen(viewModel = viewModel)
         }
-        composable("secure_notes") { SecureNotesScreen() }
+        composable("secure_notes") {
+            val context = LocalContext.current
+            val database = AppDatabase.getDatabase(context)
+            val noteDao = database.noteDao()
+            val viewModelFactory = NoteViewModelFactory(noteDao)
+            val viewModel: NoteViewModel = viewModel(factory = viewModelFactory)
+
+            SecureNotesScreen(viewModel = viewModel)
+        }
         composable("document_storage") { DocumentStorageScreen() }
     }
 }
@@ -98,32 +109,18 @@ fun MainScreen(navController: NavHostController) {
 }
 
 //@Composable
-//fun PasswordManagerScreen() {
+//fun SecureNotesScreen() {
 //    Surface(
 //        modifier = Modifier.fillMaxSize(),
 //        color = MaterialTheme.colorScheme.background
 //    ) {
 //        Text(
-//            text = "Password Manager",
+//            text = "Secure Notes",
 //            modifier = Modifier.fillMaxSize(),
 //            style = MaterialTheme.typography.titleLarge
 //        )
 //    }
 //}
-
-@Composable
-fun SecureNotesScreen() {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Text(
-            text = "Secure Notes",
-            modifier = Modifier.fillMaxSize(),
-            style = MaterialTheme.typography.titleLarge
-        )
-    }
-}
 
 @Composable
 fun DocumentStorageScreen() {
