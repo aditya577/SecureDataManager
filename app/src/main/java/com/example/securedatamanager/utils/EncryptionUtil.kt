@@ -1,67 +1,122 @@
 package com.example.securedatamanager.utils
 
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import android.util.Base64
+import android.util.Log
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.OutputStream
+import java.security.KeyStore
+import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.CipherInputStream
 import javax.crypto.CipherOutputStream
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 object EncryptionUtil {
-    private const val ALGORITHM = "AES"
-    private const val TRANSFORMATION = "AES/ECB/PKCS5Padding"
-    private const val SECRET_KEY = "1234567890123456" // Replace with a securely generated key
+    private const val ANDROID_KEYSTORE = "AndroidKeyStore"
+    private const val KEY_ALIAS = "SecureDataManagerKey"
+
+    private fun getSecretKey(): SecretKey {
+        val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
+        return if (keyStore.containsAlias(KEY_ALIAS)) {
+            val key = keyStore.getKey(KEY_ALIAS, null) as? SecretKey
+            key ?: throw IllegalStateException("Key is invalid or null!")
+        } else {
+            val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE)
+            val keyGenParameterSpec = KeyGenParameterSpec.Builder(
+                KEY_ALIAS,
+                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+            ).setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .build()
+
+            keyGenerator.init(keyGenParameterSpec)
+            keyGenerator.generateKey()
+        }
+    }
 
     fun encrypt(data: String): String {
-        val cipher = Cipher.getInstance(TRANSFORMATION)
-        val key = SecretKeySpec(SECRET_KEY.toByteArray(), ALGORITHM)
-        cipher.init(Cipher.ENCRYPT_MODE, key)
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.ENCRYPT_MODE, getSecretKey())
+
+        val iv = cipher.iv
         val encryptedValue = cipher.doFinal(data.toByteArray())
-        return Base64.encodeToString(encryptedValue, Base64.DEFAULT)
+        val combined = iv + encryptedValue
+        return Base64.encodeToString(combined, Base64.DEFAULT)
     }
 
     fun decrypt(data: String): String {
         return try {
-            if (!isBase64(data)) {
-                return data // Return as-is if it's not Base64-encoded (plaintext)
-            }
-            val cipher = Cipher.getInstance(TRANSFORMATION)
-            val key = SecretKeySpec(SECRET_KEY.toByteArray(), ALGORITHM)
-            cipher.init(Cipher.DECRYPT_MODE, key)
-            val decodedValue = Base64.decode(data, Base64.DEFAULT)
-            val decryptedValue = cipher.doFinal(decodedValue)
+            val decodedData = Base64.decode(data, Base64.DEFAULT)
+            val iv = decodedData.copyOfRange(0, 12)
+            val encryptedValue = decodedData.copyOfRange(12, decodedData.size)
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), GCMParameterSpec(128, iv))
+
+            val decryptedValue = cipher.doFinal(encryptedValue)
             String(decryptedValue)
         } catch (e: Exception) {
-            data // Return the original data in case of any exception
+            Log.e("EncryptionUtil", "Decryption failed: ${e.message}")
+            e.printStackTrace()
+            data // Return the original input in case of an error
         }
     }
 
     fun encryptFile(inputFile: File, outputFile: File) {
-        val cipher = Cipher.getInstance(TRANSFORMATION)
-        val key = SecretKeySpec(SECRET_KEY.toByteArray(), ALGORITHM)
-        cipher.init(Cipher.ENCRYPT_MODE, key)
+        require(inputFile.exists()) { "Input file does not exist!" }
+        require(inputFile.length() > 0) { "Input file is empty!" }
 
-        FileInputStream(inputFile).use { fis ->
+        try {
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            val secretKey = getSecretKey()
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey)
+            val iv = cipher.iv
+
             FileOutputStream(outputFile).use { fos ->
-                CipherOutputStream(fos, cipher).use { cos ->
-                    fis.copyTo(cos)
+                fos.write(iv)
+
+                FileInputStream(inputFile).use { fis ->
+                    CipherOutputStream(fos, cipher).use { cos ->
+                        fis.copyTo(cos)
+                    }
                 }
             }
+
+            Log.d("EncryptionUtil", "File encrypted successfully!")
+        } catch (e: Exception) {
+            Log.e("EncryptionUtil", "Error during encryption: ${e.message}")
+            throw e
         }
     }
 
     fun decryptFile(inputFile: File, outputStream: OutputStream) {
-        val cipher = Cipher.getInstance(TRANSFORMATION)
-        val key = SecretKeySpec(SECRET_KEY.toByteArray(), ALGORITHM)
-        cipher.init(Cipher.DECRYPT_MODE, key)
+        require(inputFile.exists()) { "Input file does not exist!" }
 
-        FileInputStream(inputFile).use { fis ->
-            CipherInputStream(fis, cipher).use { cis ->
-                cis.copyTo(outputStream)
+        try {
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+
+            FileInputStream(inputFile).use { fis ->
+                val iv = ByteArray(12)
+                fis.read(iv)
+
+                val secretKey = getSecretKey()
+                cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, iv))
+
+                CipherInputStream(fis, cipher).use { cis ->
+                    cis.copyTo(outputStream)
+                }
             }
+
+            Log.d("EncryptionUtil", "Decryption completed successfully!")
+        } catch (e: Exception) {
+            Log.e("EncryptionUtil", "Error during decryption: ${e.message}")
+            throw e
         }
     }
 
