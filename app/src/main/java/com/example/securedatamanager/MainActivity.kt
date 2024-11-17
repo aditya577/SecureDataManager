@@ -22,6 +22,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.securedatamanager.data.database.AppDatabase
+import com.example.securedatamanager.ui.documents.DocumentStorageScreen
+import com.example.securedatamanager.ui.documents.DocumentViewModel
+import com.example.securedatamanager.ui.documents.DocumentViewModelFactory
 import com.example.securedatamanager.ui.notes.NoteViewModel
 import com.example.securedatamanager.ui.notes.NoteViewModelFactory
 import com.example.securedatamanager.ui.notes.SecureNotesScreen
@@ -75,7 +78,15 @@ fun AppNavigator() {
 
             SecureNotesScreen(viewModel = viewModel)
         }
-        composable("document_storage") { DocumentStorageScreen() }
+        composable("document_storage") {
+            val context = LocalContext.current
+            val database = AppDatabase.getDatabase(context)
+            val documentDao = database.documentDao()
+            val viewModelFactory = DocumentViewModelFactory(documentDao)
+            val viewModel: DocumentViewModel = viewModel(factory = viewModelFactory)
+
+            DocumentStorageScreen(viewModel = viewModel)
+        }
     }
 }
 
@@ -110,16 +121,16 @@ fun MainScreen(navController: NavHostController) {
     }
 }
 
-@Composable
-fun DocumentStorageScreen() {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Text(
-            text = "Document Storage",
-            modifier = Modifier.fillMaxSize(),
-            style = MaterialTheme.typography.titleLarge
-        )
-    }
-}
+//@Composable
+//fun DocumentStorageScreen() {
+//    Surface(
+//        modifier = Modifier.fillMaxSize(),
+//        color = MaterialTheme.colorScheme.background
+//    ) {
+//        Text(
+//            text = "Document Storage",
+//            modifier = Modifier.fillMaxSize(),
+//            style = MaterialTheme.typography.titleLarge
+//        )
+//    }
+//}

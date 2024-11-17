@@ -3,7 +3,7 @@ package com.example.securedatamanager.ui.notes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.securedatamanager.data.database.Note
-import com.example.securedatamanager.data.database.NoteDao
+import com.example.securedatamanager.data.dao.NoteDao
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

@@ -1,7 +1,13 @@
 package com.example.securedatamanager.utils
 
 import android.util.Base64
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.OutputStream
 import javax.crypto.Cipher
+import javax.crypto.CipherInputStream
+import javax.crypto.CipherOutputStream
 import javax.crypto.spec.SecretKeySpec
 
 object EncryptionUtil {
@@ -30,6 +36,32 @@ object EncryptionUtil {
             String(decryptedValue)
         } catch (e: Exception) {
             data // Return the original data in case of any exception
+        }
+    }
+
+    fun encryptFile(inputFile: File, outputFile: File) {
+        val cipher = Cipher.getInstance(TRANSFORMATION)
+        val key = SecretKeySpec(SECRET_KEY.toByteArray(), ALGORITHM)
+        cipher.init(Cipher.ENCRYPT_MODE, key)
+
+        FileInputStream(inputFile).use { fis ->
+            FileOutputStream(outputFile).use { fos ->
+                CipherOutputStream(fos, cipher).use { cos ->
+                    fis.copyTo(cos)
+                }
+            }
+        }
+    }
+
+    fun decryptFile(inputFile: File, outputStream: OutputStream) {
+        val cipher = Cipher.getInstance(TRANSFORMATION)
+        val key = SecretKeySpec(SECRET_KEY.toByteArray(), ALGORITHM)
+        cipher.init(Cipher.DECRYPT_MODE, key)
+
+        FileInputStream(inputFile).use { fis ->
+            CipherInputStream(fis, cipher).use { cis ->
+                cis.copyTo(outputStream)
+            }
         }
     }
 

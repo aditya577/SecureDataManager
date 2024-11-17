@@ -4,11 +4,15 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.securedatamanager.data.dao.DocumentDao
+import com.example.securedatamanager.data.dao.NoteDao
+import com.example.securedatamanager.data.dao.PasswordDao
 
-@Database(entities = [Password::class, Note::class], version = 2, exportSchema = false)
+@Database(entities = [Password::class, Note::class, Document::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun passwordDao(): PasswordDao
     abstract fun noteDao(): NoteDao
+    abstract fun documentDao(): DocumentDao
 
     companion object {
         @Volatile

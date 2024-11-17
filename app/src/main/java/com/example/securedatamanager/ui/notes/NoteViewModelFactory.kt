@@ -2,7 +2,7 @@ package com.example.securedatamanager.ui.notes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.securedatamanager.data.database.NoteDao
+import com.example.securedatamanager.data.dao.NoteDao
 
 class NoteViewModelFactory(private val noteDao: NoteDao) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

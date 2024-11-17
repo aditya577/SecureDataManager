@@ -2,7 +2,7 @@ package com.example.securedatamanager.ui.password
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.securedatamanager.data.database.PasswordDao
+import com.example.securedatamanager.data.dao.PasswordDao
 
 class PasswordManagerViewModelFactory(private val passwordDao: PasswordDao) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

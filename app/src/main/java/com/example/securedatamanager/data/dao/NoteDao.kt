@@ -1,6 +1,7 @@
-package com.example.securedatamanager.data.database
+package com.example.securedatamanager.data.dao
 
 import androidx.room.*
+import com.example.securedatamanager.data.database.Note
 
 @Dao
 interface NoteDao {

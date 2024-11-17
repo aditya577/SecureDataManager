@@ -1,6 +1,6 @@
 package com.example.securedatamanager.utils
 
-import com.example.securedatamanager.data.database.NoteDao
+import com.example.securedatamanager.data.dao.NoteDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

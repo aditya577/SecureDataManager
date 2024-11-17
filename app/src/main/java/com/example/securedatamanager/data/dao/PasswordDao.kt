@@ -1,10 +1,11 @@
-package com.example.securedatamanager.data.database
+package com.example.securedatamanager.data.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.example.securedatamanager.data.database.Password
 import com.example.securedatamanager.utils.EncryptionUtil
 
 @Dao

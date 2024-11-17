@@ -3,7 +3,7 @@ package com.example.securedatamanager.ui.password
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.securedatamanager.data.database.Password
-import com.example.securedatamanager.data.database.PasswordDao
+import com.example.securedatamanager.data.dao.PasswordDao
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
