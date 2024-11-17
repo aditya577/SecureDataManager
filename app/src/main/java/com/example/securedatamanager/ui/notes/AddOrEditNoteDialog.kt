@@ -16,7 +16,7 @@ fun AddOrEditNoteDialog(
     onAddOrEditNote: (Note) -> Unit
 ) {
     var title by remember { mutableStateOf(noteToEdit?.title ?: "") }
-    var content by remember { mutableStateOf(noteToEdit?.content ?: "") }
+    var content by remember { mutableStateOf(noteToEdit?.let { EncryptionUtil.decrypt(it.content) } ?: "") }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(

@@ -29,6 +29,7 @@ import com.example.securedatamanager.ui.password.PasswordManagerScreen
 import com.example.securedatamanager.ui.password.PasswordManagerViewModel
 import com.example.securedatamanager.ui.password.PasswordManagerViewModelFactory
 import com.example.securedatamanager.ui.theme.SecureDataManagerTheme
+import com.example.securedatamanager.utils.migrateExistingNotes
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,6 +69,7 @@ fun AppNavigator() {
             val context = LocalContext.current
             val database = AppDatabase.getDatabase(context)
             val noteDao = database.noteDao()
+            migrateExistingNotes(noteDao)
             val viewModelFactory = NoteViewModelFactory(noteDao)
             val viewModel: NoteViewModel = viewModel(factory = viewModelFactory)
 

@@ -33,7 +33,7 @@ object EncryptionUtil {
         }
     }
 
-    private fun isBase64(data: String): Boolean {
+    fun isBase64(data: String): Boolean {
         return try {
             Base64.decode(data, Base64.DEFAULT)
             true
