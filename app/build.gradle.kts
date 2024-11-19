@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    kotlin("kapt") // Add this for annotation processing
+    kotlin("kapt")
 }
 
 android {
@@ -51,13 +51,13 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.room.runtime)
-    kapt("androidx.room:room-compiler:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    implementation("androidx.navigation:navigation-compose:2.8.4")
-    implementation("androidx.security:security-crypto:1.1.0-alpha04")
-    implementation("com.google.errorprone:error_prone_annotations:2.15.0")
-    implementation("javax.annotation:javax.annotation-api:1.3.2")
-    implementation("com.google.code.findbugs:jsr305:3.0.2")
+    kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.google.errorprone.annotations)
+    implementation(libs.javax.annotation.api)
+    implementation(libs.findbugs.jsr305)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
