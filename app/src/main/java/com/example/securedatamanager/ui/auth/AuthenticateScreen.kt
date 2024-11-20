@@ -48,5 +48,6 @@ fun AuthenticateScreen(navController: NavController) {
             Text(errorMessage, color = MaterialTheme.colorScheme.error)
         }
     }
+//    AppLockManager.onSuccessfulAuthentication()
 }
 

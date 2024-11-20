@@ -9,13 +9,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -34,6 +35,7 @@ import com.example.securedatamanager.ui.password.PasswordManagerScreen
 import com.example.securedatamanager.ui.password.PasswordManagerViewModel
 import com.example.securedatamanager.ui.password.PasswordManagerViewModelFactory
 import com.example.securedatamanager.ui.theme.SecureDataManagerTheme
+import com.example.securedatamanager.utils.AppLockManager
 import com.example.securedatamanager.utils.EncryptionUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,13 +44,27 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Add AppLockManager as a lifecycle observer
+        ProcessLifecycleOwner.get().lifecycle.addObserver(
+            LifecycleEventObserver { _, event ->
+                when (event) {
+                    Lifecycle.Event.ON_STOP -> AppLockManager.onStop(ProcessLifecycleOwner.get())
+                    Lifecycle.Event.ON_START -> AppLockManager.onStart(ProcessLifecycleOwner.get())
+                    else -> Unit
+                }
+            }
+        )
+
+        // Set content for the app
         setContent {
             SecureDataManagerTheme {
-                AuthNavHost()
+                AuthNavHost() // Using the existing AuthNavHost without needing to pass NavController explicitly
             }
         }
     }
 }
+
 
 @Composable
 fun AppNavigator() {
