@@ -10,14 +10,25 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.securedatamanager.ui.commons.AppBarWithBackButton
 
 @Composable
-fun DocumentStorageScreen(viewModel: DocumentViewModel) {
+fun DocumentStorageScreen(
+    viewModel: DocumentViewModel,
+    onBackClick: (() -> Unit)? = null
+) {
     val documents by viewModel.documents.collectAsState()
     var showUploadDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     Scaffold(
+        topBar = {
+            AppBarWithBackButton(
+                title = "Document Storage",
+                showBackButton = onBackClick != null, // Show back button only if onBackClick is provided
+                onBackClick = { onBackClick?.invoke() } // Invoke back click if not null
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = { showUploadDialog = true }) {
                 Icon(Icons.Default.Add, contentDescription = "Upload Document")

@@ -10,15 +10,24 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.securedatamanager.ui.commons.AppBarWithBackButton
 
 @Composable
 fun PasswordManagerScreen(
-    viewModel: PasswordManagerViewModel = viewModel() // Pass the ViewModel
+    viewModel: PasswordManagerViewModel = viewModel(),
+    onBackClick: (() -> Unit)? = null
 ) {
-    val passwords by viewModel.passwords.collectAsState() // Collect passwords as state
-    var showDialog by remember { mutableStateOf(false) } // Dialog visibility state
+    val passwords by viewModel.passwords.collectAsState()
+    var showDialog by remember { mutableStateOf(false)}
 
     Scaffold(
+        topBar = {
+            AppBarWithBackButton(
+                title = "Password Manager",
+                showBackButton = onBackClick != null, // Show back button only if onBackClick is provided
+                onBackClick = { onBackClick?.invoke() } // Invoke back click if not null
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = { showDialog = true }) {
                 Icon(Icons.Default.Add, contentDescription = "Add Password")
@@ -42,7 +51,7 @@ fun PasswordManagerScreen(
         AddPasswordDialog(
             onDismiss = { showDialog = false },
             onAddPassword = { newPassword ->
-                viewModel.addPassword(newPassword) // Add password to ViewModel
+                viewModel.addPassword(newPassword)
                 showDialog = false
             }
         )

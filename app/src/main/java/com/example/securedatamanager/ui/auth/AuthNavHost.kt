@@ -7,7 +7,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.securedatamanager.AppNavigator
+import com.example.securedatamanager.ui.commons.AppNavigator
 import com.example.securedatamanager.utils.AppLockManager
 import com.example.securedatamanager.utils.SecurePrefs
 

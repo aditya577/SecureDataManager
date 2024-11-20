@@ -9,15 +9,26 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.securedatamanager.ui.commons.AppBarWithBackButton
 import com.example.securedatamanager.data.database.Note
 
 @Composable
-fun SecureNotesScreen(viewModel: NoteViewModel) {
+fun SecureNotesScreen(
+    viewModel: NoteViewModel,
+    onBackClick: (() -> Unit)? = null
+) {
     val notes by viewModel.notes.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
     var noteToEdit by remember { mutableStateOf<Note?>(null) } // Track the note being edited
 
     Scaffold(
+        topBar = {
+            AppBarWithBackButton(
+                title = "Secure Notes",
+                showBackButton = onBackClick != null, // Show back button only if onBackClick is provided
+                onBackClick = { onBackClick?.invoke() } // Invoke back click if not null
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 showDialog = true
