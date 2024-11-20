@@ -1,6 +1,7 @@
 package com.example.securedatamanager.ui.documents
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -69,18 +70,25 @@ fun UploadDocumentDialog(
                                 context.filesDir,
                                 "${fileName.ifBlank { originalFile.name }}.enc"
                             )
+                            try {
+                                // Encrypt the file
+                                EncryptionUtil.encryptFile(originalFile, encryptedFile)
 
-                            // Encrypt the file
-                            EncryptionUtil.encryptFile(originalFile, encryptedFile)
+                                if (originalFile.exists()) {
+                                    originalFile.delete()
+                                }
 
-                            // Trigger the upload callback with metadata
-                            onUpload(
-                                Document(
-                                    name = fileName.ifBlank { originalFile.name },
-                                    filePath = encryptedFile.absolutePath,
-                                    timestamp = System.currentTimeMillis()
+                                // Trigger the upload callback with metadata
+                                onUpload(
+                                    Document(
+                                        name = fileName.ifBlank { originalFile.name },
+                                        filePath = encryptedFile.absolutePath,
+                                        timestamp = System.currentTimeMillis()
+                                    )
                                 )
-                            )
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "Failed to encrypt file: ${e.message}", Toast.LENGTH_LONG).show()
+                            }
                         }
                     }) {
                         Text("Upload")
