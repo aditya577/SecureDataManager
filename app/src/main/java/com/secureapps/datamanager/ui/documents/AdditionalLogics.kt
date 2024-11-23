@@ -3,6 +3,7 @@ package com.secureapps.datamanager.ui.documents
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,12 +17,19 @@ import java.io.File
 
 @Composable
 fun DecryptAndSaveFileWithUserSelection(context: Context, document: Document) {
+    val decryptedFileName = EncryptionUtil.decrypt(document.name)
+    Log.d("DownloadFile", "encrypted file name: ${document.name}")
+    Log.d("DownloadFile", "decrypted file name: $decryptedFileName")
+
     val saveLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument()
     ) { uri: Uri? ->
         if (uri != null) {
             try {
-                val encryptedFile = File(document.filePath)
+                var filepath = "${document.folderUUID}/${document.fileUUID}"
+                Log.d("DownloadFile", "filepath: $filepath")
+                val encryptedFile = File(context.filesDir, filepath)
+                Log.d("DownloadFile", "encryptedFile: $encryptedFile")
                 val outputStream = context.contentResolver.openOutputStream(uri)
                 if (outputStream != null) {
                     // Decrypt and save the file
@@ -41,7 +49,7 @@ fun DecryptAndSaveFileWithUserSelection(context: Context, document: Document) {
 
     Button(onClick = {
         // Launch save dialog
-        saveLauncher.launch(document.name)
+        saveLauncher.launch(decryptedFileName)
     }) {
         Text("Download File")
     }

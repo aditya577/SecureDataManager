@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class Document(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
-    val filePath: String, // Path to the stored document file
+    val folderUUID: String,
+    val fileUUID: String,
     val timestamp: Long
 )
