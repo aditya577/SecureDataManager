@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.securedatamanager"
+    namespace = "com.secureapps.datamanager"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.securedatamanager"
+        applicationId = "com.secureapps.datamanager"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
