@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.secureapps.datamanager.data.database.Document
 import com.secureapps.datamanager.ui.commons.AppBarWithBackButton
 
 @Composable
@@ -19,6 +20,7 @@ fun DocumentStorageScreen(
 ) {
     val documents by viewModel.documents.collectAsState()
     var showUploadDialog by remember { mutableStateOf(false) }
+    var documentToDelete by remember { mutableStateOf<Document?>(null) }
     val context = LocalContext.current
 
     Scaffold(
@@ -45,7 +47,7 @@ fun DocumentStorageScreen(
                 items(documents) { document ->
                     DocumentItem(
                         document = document,
-                        onDelete = { viewModel.deleteDocument(it) },
+                        onDelete = { documentToDelete = document },
                         context = context
                     )
                 }
@@ -59,6 +61,31 @@ fun DocumentStorageScreen(
             onUpload = { newDocument ->
                 viewModel.addDocument(newDocument)
                 showUploadDialog = false
+            }
+        )
+    }
+
+    if (documentToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { documentToDelete = null },
+            title = { Text(text = "Delete Document") },
+            text = { Text(text = "Are you sure you want to delete this document? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    documentToDelete?.let {
+                        // Delete the document from the database and remove the file
+                        viewModel.deleteDocument(it)
+                        deleteEncryptedFile(context, it.folderUUID, it.fileUUID)
+                    }
+                    documentToDelete = null // Dismiss the dialog
+                }) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { documentToDelete = null }) {
+                    Text("Cancel")
+                }
             }
         )
     }
