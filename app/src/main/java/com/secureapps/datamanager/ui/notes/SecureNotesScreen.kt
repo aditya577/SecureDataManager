@@ -19,7 +19,8 @@ fun SecureNotesScreen(
 ) {
     val notes by viewModel.notes.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
-    var noteToEdit by remember { mutableStateOf<Note?>(null) } // Track the note being edited
+    var noteToEdit by remember { mutableStateOf<Note?>(null) }
+    var noteToDelete by remember { mutableStateOf<Note?>(null) }
 
     Scaffold(
         topBar = {
@@ -48,7 +49,7 @@ fun SecureNotesScreen(
                 items(notes) { note ->
                     NoteItem(
                         note = note,
-                        onDelete = { viewModel.deleteNote(it) },
+                        onDelete = { noteToDelete = note },
                         onEdit = {
                             noteToEdit = it // Set the note for editing
                             showDialog = true
@@ -70,6 +71,30 @@ fun SecureNotesScreen(
                     viewModel.addNote(newNote.copy(id = noteToEdit!!.id)) // Update existing note
                 }
                 showDialog = false
+            }
+        )
+    }
+
+    if (noteToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { noteToDelete = null },
+            title = { Text(text = "Delete Note") },
+            text = { Text(text = "Are you sure you want to delete this note? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    noteToDelete?.let {
+                        // Delete the note from the database
+                        viewModel.deleteNote(it)
+                    }
+                    noteToDelete = null // Dismiss the dialog
+                }) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { noteToDelete = null }) {
+                    Text("Cancel")
+                }
             }
         )
     }

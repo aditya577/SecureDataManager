@@ -13,12 +13,13 @@ import com.secureapps.datamanager.utils.EncryptionUtil
 
 @Composable
 fun AddPasswordDialog(
+    passwordToEdit: Password?,
     onDismiss: () -> Unit,
     onAddPassword: (Password) -> Unit
 ) {
-    var siteName by remember { mutableStateOf("") }
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var siteName by remember { mutableStateOf(passwordToEdit?.siteName ?: "") }
+    var username by remember { mutableStateOf(passwordToEdit?.username ?: "") }
+    var password by remember { mutableStateOf(passwordToEdit?.let { EncryptionUtil.decrypt(it.password) } ?: "") }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -58,6 +59,7 @@ fun AddPasswordDialog(
                         if (siteName.isNotBlank() && username.isNotBlank() && password.isNotBlank()) {
                             onAddPassword(
                                 Password(
+                                    id = passwordToEdit?.id ?: 0,
                                     siteName = siteName,
                                     username = username,
                                     password = EncryptionUtil.encrypt(password)
@@ -66,7 +68,7 @@ fun AddPasswordDialog(
                             onDismiss()
                         }
                     }) {
-                        Text("Add")
+                        Text(if (passwordToEdit == null) "Add" else "Save")
                     }
                 }
             }
