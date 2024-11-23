@@ -22,6 +22,7 @@ fun UploadDocumentDialog(
 ) {
     var fileName by remember { mutableStateOf("") }
     var filePath by remember { mutableStateOf<String?>(null) }
+    var errorMessage by remember { mutableStateOf("") }
     val context = LocalContext.current
 
     // Define the file picker launcher
@@ -46,7 +47,10 @@ fun UploadDocumentDialog(
             ) {
                 TextField(
                     value = fileName,
-                    onValueChange = { fileName = it },
+                    onValueChange = {
+                        fileName = it
+                        errorMessage = "" // Clear any previous error when the name is updated
+                    },
                     label = { Text("Document Name (Optional)") }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -55,6 +59,16 @@ fun UploadDocumentDialog(
                 }) {
                     Text("Choose File")
                 }
+
+                // Show selected file name if a file is picked
+                filePath?.let {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Selected File: ${File(it).name}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
                     horizontalArrangement = Arrangement.End,
@@ -66,36 +80,60 @@ fun UploadDocumentDialog(
                     TextButton(onClick = {
                         if (filePath != null) {
                             val originalFile = File(filePath!!)
-                            val encryptedFile = File(
-                                context.filesDir,
-                                "${fileName.ifBlank { originalFile.name }}.enc"
-                            )
-                            try {
-                                // Encrypt the file
-                                EncryptionUtil.encryptFile(originalFile, encryptedFile)
+                            val originalExtension = originalFile.extension
+                            val enteredExtension = File(fileName).extension
 
-                                if (originalFile.exists()) {
-                                    originalFile.delete()
+                            // Check if the extension is correct or not
+                            if (enteredExtension.isNotEmpty() && enteredExtension != originalExtension) {
+                                errorMessage = "Please use the correct extension: .$originalExtension"
+                            } else {
+                                val correctedFileName = if (enteredExtension.isEmpty()) {
+                                    "$fileName.$originalExtension"
+                                } else {
+                                    fileName
                                 }
 
-                                // Trigger the upload callback with metadata
-                                onUpload(
-                                    Document(
-                                        name = fileName.ifBlank { originalFile.name },
-                                        filePath = encryptedFile.absolutePath,
-                                        timestamp = System.currentTimeMillis()
-                                    )
+                                val encryptedFile = File(
+                                    context.filesDir,
+                                    correctedFileName.ifBlank { originalFile.name } + ".enc"
                                 )
-                            } catch (e: Exception) {
-                                Toast.makeText(context, "Failed to encrypt file: ${e.message}", Toast.LENGTH_LONG).show()
+                                try {
+                                    // Encrypt the file
+                                    EncryptionUtil.encryptFile(originalFile, encryptedFile)
+
+                                    if (originalFile.exists()) {
+                                        originalFile.delete()
+                                    }
+
+                                    // Trigger the upload callback with metadata
+                                    onUpload(
+                                        Document(
+                                            name = correctedFileName.ifBlank { originalFile.name },
+                                            filePath = encryptedFile.absolutePath,
+                                            timestamp = System.currentTimeMillis()
+                                        )
+                                    )
+                                    onDismiss()
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Failed to encrypt file: ${e.message}", Toast.LENGTH_LONG).show()
+                                }
                             }
                         }
                     }) {
                         Text("Upload")
                     }
                 }
+
+                // Show error message if there's any
+                if (errorMessage.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = errorMessage,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
     }
 }
-
