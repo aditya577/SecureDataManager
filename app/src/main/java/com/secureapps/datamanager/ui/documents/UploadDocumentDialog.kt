@@ -98,20 +98,27 @@ fun UploadDocumentDialog(
                                 fileName
                             }
 
-                            // Generate a unique alphanumeric identifier
-                            val fileUUID = UUID.randomUUID().toString().replace("-", "")
+                            // Generate a unique alphanumeric identifier for the file
+                            var fileUUID: String
                             val folderUUID = UUID.randomUUID().toString().replace("-", "")
-
-                            // Encrypt the file name
-                            Log.d("UploadFile", "filename: $correctedFileName")
-                            val encryptedFileName = EncryptionUtil.encrypt(correctedFileName)
-                            Log.d("UploadFile", "encryptedFileName: $encryptedFileName")
 
                             // Create a sub-folder with a random name
                             val subFolder = File(context.filesDir, folderUUID)
                             if (!subFolder.exists()) subFolder.mkdir()
 
-                            val encryptedFile = File(subFolder, fileUUID)
+                            do {
+                                fileUUID = UUID.randomUUID().toString().replace("-", "")
+                            } while (File(subFolder, fileUUID).exists()) // Generate new UUID if a file already exists
+
+                            val filename = correctedFileName.ifBlank { originalFile.name }
+                            Log.d("UploadFile", "filename: $filename")
+                            val encryptedFileName = EncryptionUtil.encrypt(filename)
+                            Log.d("UploadFile", "encryptedFileName: $encryptedFileName")
+
+                            val encryptedFile = File(
+                                subFolder,
+                                fileUUID
+                            )
 
                             try {
                                 // Encrypt the file
@@ -153,4 +160,3 @@ fun UploadDocumentDialog(
         }
     }
 }
-
