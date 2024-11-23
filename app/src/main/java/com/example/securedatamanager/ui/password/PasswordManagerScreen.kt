@@ -37,7 +37,8 @@ fun PasswordManagerScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding),
+                    .padding(padding)
+                    .imePadding(),
                 contentPadding = PaddingValues(16.dp)
             ) {
                 items(passwords) { password ->

@@ -7,6 +7,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun AppBarWithBackButton(
@@ -25,6 +26,7 @@ fun AppBarWithBackButton(
                     )
                 }
             }
-        } else null
+        } else null,
+        backgroundColor = Color(0xFF87CFFB) // Setting the background color to hex #87CFFB
     )
 }
